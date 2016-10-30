@@ -7,9 +7,7 @@ namespace MacierzLib
         private int m; //the number of rows
         private int n; //the number of columns
         private float[,] values;
-
-        private bool isNull;
-        public bool IsNull
+        public bool IsZero
         {
             get
             {
@@ -22,8 +20,8 @@ namespace MacierzLib
         //Constructor
         public Macierz(float[,] _values)
         {
-            m = _values.GetLength(1);
-            n = _values.GetLength(0);
+            m = _values.GetLength(0);
+            n = _values.GetLength(1);
             values = _values;
         }
         public Macierz(int _m, int _n)
@@ -34,15 +32,33 @@ namespace MacierzLib
         }
         #endregion
         #region Basic Matrix Returns
+        public static string ValueAsString(double value, int decimalPlaces)
+        {
+            return value.ToString($"F{decimalPlaces}");
+        }
         public override string ToString()
         {
             string vals = string.Empty;
+            int decimalplace = 0;
+            foreach (var v in values)
+            {               
+                var str = v.ToString();
 
+                if (str.Contains(","))
+                {
+                    string[] strs = str.Split(',');
+
+                    if (strs[1].Length > decimalplace)
+                    {
+                        decimalplace = strs[1].Length;
+                    }
+                }
+            }
             for (int i = 0; i < m; i++)
             {
                 for (int j = 0; j < n; j++)
                 {
-                    vals += (values[i, j] + " ");
+                    vals += ( ValueAsString(values[i, j], decimalplace) +  '\t');
                 }
                 if (i < m - 1) vals += "\n";
             }
@@ -84,74 +100,94 @@ namespace MacierzLib
         //Adding
         public static Macierz operator +(Macierz a, Macierz b)
         {
-            canIAddorSubtract(a, b);
-            Macierz newValues = new Macierz(a.m, a.n);
-            for (int i = 0; i < a.m; i++)
+            try
             {
-                for (int j = 0; j < a.n; j++)
+                canIAddorSubtract(a, b);
+                Macierz newValues = new Macierz(a.m, a.n);
+                for (int i = 0; i < a.m; i++)
                 {
-                    newValues[i, j] = a.values[i, j] + b.values[i, j];
+                    for (int j = 0; j < a.n; j++)
+                    {
+                        newValues[i, j] = a.values[i, j] + b.values[i, j];
+                    }
                 }
+                return newValues;
             }
-            return newValues;
+            catch (Exception e)
+            {
+                Console.WriteLine();
+                Console.WriteLine(e.Message);
+                return new Macierz(0, 0);
+            }
         }
-        //Substracing
+        //Subtracting
         public static Macierz operator -(Macierz a, Macierz b)
         {
-            canIAddorSubtract(a, b);
-            Macierz newValues = new Macierz(a.m, a.n);
-            for (int i = 0; i < a.m; i++)
+            try
             {
-                for (int j = 0; j < a.n; j++)
+                canIAddorSubtract(a, b);
+                Macierz newValues = new Macierz(a.m, a.n);
+                for (int i = 0; i < a.m; i++)
                 {
-                    newValues[i, j] = a.values[i, j] - b.values[i, j];
+                    for (int j = 0; j < a.n; j++)
+                    {
+                        newValues[i, j] = a.values[i, j] - b.values[i, j];
+                    }
                 }
+                return newValues;
             }
-            return newValues;
+            catch (Exception e)
+            {
+                Console.WriteLine();
+                Console.WriteLine(e.Message);
+                return new Macierz(0, 0);
+            }
         }
         //Multication
         public static Macierz operator *(Macierz a, Macierz b)
         {
-            canIMultiply(a, b);
-            Macierz newValues = new Macierz(a.n, b.m);
-
-            for (int i = 0; i < a.n; i++)
+            try
             {
-                for (int j = 0; j < newValues.GetLength(1); j++)
+                canIMultiply(a, b);
+                Macierz newValues = new Macierz(a.n, b.m);
+
+                for (int i = 0; i < a.n; i++)
                 {
-                    float w = 0;
-                    for (int k = 0; k < newValues.GetLength(1); k++)
-                        w += a[i, k] * b[k, j];
-                    newValues[i, j] = w;
+                    for (int j = 0; j < newValues.GetLength(0); j++)
+                    {
+                        float w = 0;
+                        for (int k = 0; k < newValues.GetLength(1); k++)
+                            w += a[i, k] * b[k, j];
+                        newValues[i, j] = w;
+                    }
+
                 }
-
+                return newValues;
             }
-            return newValues;
+            catch (InvalidOperationException e)
+            {
+                Console.WriteLine();
+                Console.WriteLine(e.Message);
+                return new Macierz(0, 0);
+            }
         }
-        #endregion
+        #endregion            
         #region Booleans
-        private static bool canIAddorSubtract(Macierz a, Macierz b)
+        private static void canIAddorSubtract(Macierz a, Macierz b)
         {
             if (a.m != b.m || a.n != b.n)
             {
-                return false;
-                throw new InvalidOperationException("It is not possible to subtract those matrices, make sure you input two matrices of the same dimensions");
+                throw new InvalidOperationException("It is not possible to subtract those matrices, make sure you input two matrices of the same dimensions.");
             }
-            else return true;
-
         }
-        private static bool canIMultiply(Macierz a, Macierz b)
+        private static void canIMultiply(Macierz a, Macierz b)
         {
-            if (a.m != b.m || a.n != b.n)
+            if (!(a.n == b.m))
             {
-                return false;
-                throw new InvalidOperationException("It is not possible to add those matrices, make sure you input two matrices of the same dimensions");
+                throw new InvalidOperationException("It is not possible to multipy those matrices, make sure you input correct matrices.");
             }
-            else
-                return true;
+
         }
-
-
         #endregion
     }
 }

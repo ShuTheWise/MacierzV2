@@ -5,10 +5,10 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Macierz")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("MacierzLib")]
+[assembly: AssemblyDescription("This is a library for calucating matrix operations.")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
+[assembly: AssemblyCompany(".NET Projects")]
 [assembly: AssemblyProduct("Macierz")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
 [assembly: AssemblyTrademark("")]
