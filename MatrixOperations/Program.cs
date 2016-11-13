@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
-using MacierzLib;
 using System.Reflection;
 using System.Linq;
 using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace MatrixOperations
 {
@@ -14,65 +14,59 @@ namespace MatrixOperations
         {
             Assembly assembly = Assembly.LoadFrom("Macierz.dll");
 
-            Console.Write("======================================\n" + assembly.ManifestModule + " Assembly Info \n======================================\n");         
+            Console.Write("======================================\n" + assembly.ManifestModule + " Assembly Info \n======================================\n");
 
+            AssemblyDescriptionAttribute attribute = assembly
+      .GetCustomAttributes(typeof(AssemblyDescriptionAttribute), false)
+      .OfType<AssemblyDescriptionAttribute>()
+      .SingleOrDefault();
 
-            var types = assembly.GetTypes();
-
-            Console.Write("Class : \n");
+            var verInfo = FileVersionInfo.GetVersionInfo(typeof(Macierz.Macierz).Assembly.Location);
+            Console.Write("Class :" + verInfo.ProductName + " \n");
+            Console.WriteLine("Assembly title: " + verInfo.FileDescription);
+            Console.WriteLine("Assembly description:  " + attribute.Description);
+            Console.WriteLine("Version: " + verInfo.FileVersion);
+            Console.WriteLine("Author: " + verInfo.LegalTrademarks);
+            Console.WriteLine("Company: " + verInfo.CompanyName);
+            Module manifest = typeof(Macierz.Macierz).Assembly.ManifestModule;
+            var types = manifest.GetTypes();
             foreach (var type in types)
             {
-                Console.WriteLine(type);
-                Console.Write("Methods: \n");
+                Console.WriteLine("\n"+type);
+                Console.Write("\n Fields: \n");
+                foreach (var field in @type.GetFields(BindingFlags.NonPublic | BindingFlags.Instance))
+                {
+                    Console.WriteLine("   " + field.Attributes.ToString() + " " + field.ToString());
+                }
+                //    }
+                Console.WriteLine();
+                Console.Write(" Methods: \n");
                 var meths = type.GetMethods();
                 foreach (var m in meths)
                 {
                     var attrs = m.Attributes;
-
-                    Console.WriteLine("     Attributes: " + m.Attributes + "\n     Name: " + m.Name + "\n     Return Parameters: " + m.ReturnParameter);
+                    var methodAttribues = attrs.ToString().Split(',');
+                    Console.WriteLine("     Attributes: " + methodAttribues[1] + "\n     Name: " + m.Name + "()" + "\n     Return Parameter: " + m.ReturnParameter);
                     if (m.GetParameters().Length != 0)
                     {
-                        Console.WriteLine("\n         Arguments: ");
+                        Console.WriteLine("\n         Arguments (Parameters): ");
                         var s = m.GetParameters();
                         foreach (var ss in s)
                         {
                             Console.WriteLine("                 " + ss);
                         }
                     }
-                    var body = m.GetMethodBody();
-                    try
-                    {
-                        var localvars = body.LocalVariables;
-                        Console.WriteLine("\n                   Local Variables: ");
-                        foreach (var lv in localvars)
-                        {
-                            Console.WriteLine("                                  " + lv);
-                        }
-                    }
-                    catch
-                    {
-
-                    }
                     Console.WriteLine();
                 }
-
             }
-
-            /*
-            var names = (from type in types
-                         from method in type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static)
-                         select method.ReturnParameter + " " + method.Name + " " + method.GetGenericArguments().ToString()).Distinct().ToList();
-         
-            */
-            /// names.OrderByDescending(x => x).ToList().ForEach(x => { Console.WriteLine(x); });
         }
-        private static void InputResult(Macierz a, Macierz b, Macierz c)
+        private static void InputResult(Macierz.Macierz a, Macierz.Macierz b, Macierz.Macierz c)
         {
             Console.WriteLine("\n===========Input=========");
-            promptMatrix('A', a);
-            promptMatrix('B', b);
+            PromptMatrix('A', a);
+            PromptMatrix('B', b);
             Console.WriteLine("\n===========Result=========");
-            promptMatrix('C', c);
+            PromptMatrix('C', c);
             ExitMessage();
         }
         private static void MainMenu()
@@ -80,21 +74,25 @@ namespace MatrixOperations
             Console.WriteLine("\nOne or more matrices are empty. Sorry, cannot continue.");
             Console.Write("Press any key to return to main menu: ");
             Console.ReadKey();
+            Console.Clear();
         }
         private static void NoSelection()
         {
+            Console.Clear();
             Console.WriteLine("===================================");
             Console.WriteLine("No such selection");
             Console.WriteLine("===================================");
         }
         private static void WrongValue()
         {
+            Console.Clear();
             Console.WriteLine("===================================");
             Console.WriteLine("You must type numeric value only!!!");
             Console.WriteLine("===================================");
         }
         private static void ExitMessage()
         {
+           // Console.Clear();
             Console.WriteLine("Enter any key to return to main menu or Q to quit");
             var s = Console.ReadLine();
             if (s == "q" || s == "Q")
@@ -102,7 +100,7 @@ namespace MatrixOperations
                 Environment.Exit(0);
             }
         }
-        private static Macierz ReadMatrix(string filename)
+        private static Macierz.Macierz ReadMatrix(string filename)
         {
             try
             {
@@ -129,23 +127,23 @@ namespace MatrixOperations
                     }
                 }
                 sr.Close();
-                return new Macierz(result);
+                return new Macierz.Macierz(result);
 
             }
             catch (FileNotFoundException)
             {
                 Console.WriteLine("File not found, try entering without extension !");
-                return new Macierz(0, 0);
+                return new Macierz.Macierz(0, 0);
             }
             catch (Exception)
             {
                 Console.WriteLine("Exception occured.");
                 Console.WriteLine("Check if it file has appropriate formatting.");
                 Console.WriteLine("Reading file failed.");
-                return new Macierz(0, 0);
+                return new Macierz.Macierz(0, 0);
             }
         }
-        private static void WriteFile(Macierz m)
+        private static void WriteFile(Macierz.Macierz m)
         {
             if (!m.IsZero)
             {
@@ -180,8 +178,7 @@ namespace MatrixOperations
                             Console.Write("File already exits, try diffrent name \n");
                             Console.Write("Type 'overwrite' to overwrite of any key to change name \n");
                             var crl1 = Console.ReadLine();
-                            crl1.Trim();
-                            if (crl1 != "overwrite")
+                            if (crl1?.Trim() != "overwrite")
                             {
                                 continue;
                             }
@@ -195,7 +192,7 @@ namespace MatrixOperations
                             sw.WriteLine(l);
                         }
                         sw.Close();
-                        Console.Write("\n File saved.");
+                        Console.Write("\n =============File saved.============\n");
                         break;
                     }
                 }
@@ -213,20 +210,20 @@ namespace MatrixOperations
                 Console.WriteLine("No files were created");
             }
         }
-        private static Macierz CreateMatrix()
+        private static Macierz.Macierz CreateMatrix()
         {
             Console.WriteLine("You are creating an m-by-n matrix.");
             Console.Write("Enter m: ");
-            var choice_m = Console.ReadLine();
+            var choiceM = Console.ReadLine();
             int m = 0;
-            if (int.TryParse(choice_m, out m) && m > 0)
+            if (int.TryParse(choiceM, out m) && m > 0)
             {
                 Console.Write("Enter n: ");
-                var choice_n = Console.ReadLine();
+                var choiceN = Console.ReadLine();
                 int n = 0;
-                if (int.TryParse(choice_n, out n) && n > 0)
+                if (int.TryParse(choiceN, out n) && n > 0)
                 {
-                    Macierz matrix = new Macierz(m, n);
+                    Macierz.Macierz matrix = new Macierz.Macierz(m, n);
 
                     Console.WriteLine("\n Type values (from left to right and top to bottom). Use \",\" as decimal point. Press 'Enter' after each value.");
                     for (int i = 0; i < m; i++)
@@ -235,8 +232,7 @@ namespace MatrixOperations
                         {
                             float f = 0;
                             var val = Console.ReadLine();
-                            val.Trim();
-                            if (float.TryParse(val, out f))
+                            if (float.TryParse(val?.Trim(), out f))
                             {
                                 matrix[i, j] = f;
                             }
@@ -245,17 +241,17 @@ namespace MatrixOperations
                                 Console.Write("Ops, wrong value \n");
 
                                 Console.Write("===============\n HINT\n =============== \n Read the above. Enter only numeric values. \n ------------------------------");
-                                return new Macierz(0, 0);
+                                return new Macierz.Macierz(0, 0);
                             }
                         }
                     }
                     return matrix;
                 }
-                else return new Macierz(0, 0);
+                else return new Macierz.Macierz(0, 0);
             }
-            else return new Macierz(0, 0);
+            else return new Macierz.Macierz(0, 0);
         }
-        private static void promptMatrix(char symbol, Macierz m)
+        private static void PromptMatrix(char symbol, Macierz.Macierz m)
         {
             if (m.IsZero)
             {
@@ -269,7 +265,7 @@ namespace MatrixOperations
                 Console.WriteLine("Sum of all cells: " + m.Sum());
             }
         }
-        private static void promptMatrix(string text, Macierz m)
+        private static void PromptMatrix(string text, Macierz.Macierz m)
         {
             Console.WriteLine("\n " + text + ": ");
             Console.WriteLine("Dimensions: " + m.GetLength(0) + " x " + m.GetLength(1));
@@ -279,9 +275,9 @@ namespace MatrixOperations
         #endregion
         static void Main(string[] args)
         {
-            Macierz matrixA = new Macierz(0, 0);
-            Macierz matrixB = new Macierz(0, 0);
-            Macierz matrixC = new Macierz(0, 0);
+            Macierz.Macierz matrixA = new Macierz.Macierz(0, 0);
+            Macierz.Macierz matrixB = new Macierz.Macierz(0, 0);
+            Macierz.Macierz matrixC = new Macierz.Macierz(0, 0);
 
             Console.WriteLine("Welcome to program called MatrixOperations.");
             for (;;)
@@ -320,13 +316,13 @@ namespace MatrixOperations
                             if (w1)
                             {
                                 Console.WriteLine("Matrix A is empty \n");
-                                promptMatrix('B', matrixB);
+                                PromptMatrix('B', matrixB);
                                 MainMenu();
                                 break;
                             }
                             if (w2)
                             {
-                                promptMatrix('A', matrixA);
+                                PromptMatrix('A', matrixA);
                                 Console.WriteLine("");
                                 Console.WriteLine("Matrix B is empty");
                                 MainMenu();
@@ -348,15 +344,15 @@ namespace MatrixOperations
                                 }
                                 else
                                 {
-                                    promptMatrix('C', matrixC);
+                                    PromptMatrix('C', matrixC);
                                     Console.WriteLine("\nContinue to overwrite matrix C");
                                 }
                             }
                             //Else if is it's all good
                             if (allGood)
                             {
-                                promptMatrix('A', matrixA);
-                                promptMatrix('B', matrixB);
+                                PromptMatrix('A', matrixA);
+                                PromptMatrix('B', matrixB);
 
                                 Console.WriteLine("\n\nHelp on:");
                                 Console.WriteLine("  1. C = A + B / B + A");
@@ -399,8 +395,8 @@ namespace MatrixOperations
                                             InputResult(matrixA, matrixB, matrixC);
                                             break;
                                         case 6:
-                                            promptMatrix('A', matrixA);
-                                            promptMatrix('B', matrixB);
+                                            PromptMatrix('A', matrixA);
+                                            PromptMatrix('B', matrixB);
                                             ExitMessage();
                                             break;
                                         case 7:
@@ -438,9 +434,9 @@ namespace MatrixOperations
                                 {
                                     case 4:
                                         {
-                                            promptMatrix('A', matrixA);
-                                            promptMatrix('B', matrixB);
-                                            promptMatrix('C', matrixC);
+                                            PromptMatrix('A', matrixA);
+                                            PromptMatrix('B', matrixB);
+                                            PromptMatrix('C', matrixC);
                                             break;
                                         }
                                     case 2:
@@ -469,11 +465,10 @@ namespace MatrixOperations
                                     case 3:
                                         Console.WriteLine("Type the name of the file :");
                                         var k3 = Console.ReadLine();
-                                        k3.Trim();
-                                        Macierz temp = ReadMatrix(k3);
+                                        Macierz.Macierz temp = ReadMatrix(k3?.Trim());
                                         if (!temp.IsZero)
                                         {
-                                            promptMatrix("Matrix found in file: ", temp);
+                                            PromptMatrix("Matrix found in file: ", temp);
                                             Console.WriteLine("Type 'A' to overwrite matrix A, 'B' to overwrite matrix B [Q to break] :");
                                             var k31 = Console.ReadLine();
                                             if (k31 == "A" || k31 == "a")
@@ -543,6 +538,7 @@ namespace MatrixOperations
                             AssemblyInfo();
                             break;
                         case 4:
+                            Console.Clear();
                             Console.WriteLine("===================================");
                             Console.WriteLine("The author of this program: \n \nŁukasz Kandziora, SSM Informatyka AEI, Politechnika Śląska \n");
                             Console.WriteLine("===================================");

@@ -5,13 +5,13 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("MacierzLib")]
+[assembly: AssemblyTitle("Macierz Library")]
 [assembly: AssemblyDescription("This is a library for calucating matrix operations.")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany(".NET Projects")]
 [assembly: AssemblyProduct("Macierz")]
 [assembly: AssemblyCopyright("Copyright ©  2016")]
-[assembly: AssemblyTrademark("")]
+[assembly: AssemblyTrademark("Łukasz Kandziora")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 

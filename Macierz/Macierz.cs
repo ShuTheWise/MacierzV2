@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MacierzLib
+namespace Macierz
 {
     public class Macierz
     {
@@ -182,7 +182,7 @@ namespace MacierzLib
         }
         private static void canIMultiply(Macierz a, Macierz b)
         {
-            if (!(a.n == b.m))
+            if (a.n != b.m)
             {
                 throw new InvalidOperationException("It is not possible to multipy those matrices, make sure you input correct matrices.");
             }
