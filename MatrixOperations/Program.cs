@@ -548,7 +548,7 @@ namespace MatrixOperations
                             break;
                         case 6:
                             Console.WriteLine("In menus use only numeric values like 1,2,3 ... to select the option of your preference.");
-                            Console.WriteLine("The memory state doesn't change if you enter a matrix with mis");
+                            Console.WriteLine("The memory state doesn't change if you enter a matrix incorrectly.");
                             Console.ReadKey();
                             break;
                         case 7:
